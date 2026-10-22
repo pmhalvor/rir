@@ -1,0 +1,28 @@
+import os
+import random
+import sys
+
+from rir import mailer, notion
+
+
+def main():
+    env = os.environ
+    articles = notion.fetch_articles(
+        env["NOTION_TOKEN"], env["NOTION_DATABASE_ID"], env.get("NOTION_PUBLIC_BASE_URL")
+    )
+    if not articles:
+        print("No articles found; nothing to send.")
+        return 0
+    chosen = mailer.pick_articles(articles, int(env.get("RIR_ARTICLE_COUNT", "4")), random.Random())
+    recipients = [r.strip() for r in env["RIR_RECIPIENTS"].split(",") if r.strip()]
+    msg = mailer.build_message(chosen, env.get("SMTP_FROM", env.get("SMTP_USER", "")), recipients)
+    if env.get("RIR_DRY_RUN"):
+        print(msg)
+        return 0
+    mailer.send(msg, env["SMTP_HOST"], int(env.get("SMTP_PORT", "587")), env.get("SMTP_USER"), env.get("SMTP_PASSWORD"))
+    print(f"Sent {len(chosen)} articles to {len(recipients)} recipient(s).")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
