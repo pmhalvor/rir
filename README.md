@@ -17,3 +17,14 @@ Weekly crontab (Mondays 08:00):
 ```
 
 Tests: `pip install pytest && pytest`
+
+## Configuration
+Secrets live in a local `.env` file (git-ignored), read automatically from the working
+directory (override with `RIR_ENV_FILE`). Real environment variables take precedence.
+When running in Docker, mount it: `docker run --rm -v $PWD/.env:/app/.env rir`
+(or keep using `--env-file .env`).
+
+For SMTP, a dev mailbox is enough: e.g. a Gmail account with an
+[app password](https://myaccount.google.com/apppasswords) (`SMTP_HOST=smtp.gmail.com`,
+`SMTP_PORT=587`), or a local catcher like MailHog/Mailpit. Use `RIR_DRY_RUN=1` to test
+the Notion side without sending anything.

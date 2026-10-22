@@ -3,9 +3,11 @@ import random
 import sys
 
 from rir import mailer, notion
+from rir.env import load_dotenv
 
 
 def main():
+    load_dotenv(os.environ.get("RIR_ENV_FILE", ".env"))
     env = os.environ
     articles = notion.fetch_articles(
         env["NOTION_TOKEN"], env["NOTION_DATABASE_ID"], env.get("NOTION_PUBLIC_BASE_URL")
