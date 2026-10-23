@@ -30,7 +30,7 @@ def has_content(token, page_id, min_blocks=1):
 def parse_page(page, public_base=None):
     props = page.get("properties", {})
 
-    title, tags, status = "Untitled", [], ""
+    title, tags, tag_colors, status = "Untitled", [], {}, ""
 
     for name, prop in props.items():
         kind = prop.get("type")
@@ -40,6 +40,7 @@ def parse_page(page, public_base=None):
             status = (prop.get(kind) or {}).get("name", "")
         elif kind == "multi_select" and not tags:
             tags = [o["name"] for o in prop["multi_select"]]
+            tag_colors = {o["name"]: o.get("color", "default") for o in prop["multi_select"]}
 
     if public_base:
         url = public_base.rstrip("/") + "/" + page["id"].replace("-", "")
@@ -49,6 +50,8 @@ def parse_page(page, public_base=None):
         "id": page["id"],
         "title": title,
         "tags": tags,
+        "tag_colors": tag_colors,
+        "created": page.get("created_time", ""),
         "url": url,
         "status": status,
         "commented": False,
@@ -70,6 +73,11 @@ def fetch_articles(token, database_id, public_base=None, min_blocks=1):
             if article["status"] == "Read":
                 article["commented"] = has_content(token, p["id"], min_blocks)
             articles.append(article)
+        
+        print(f"Fetched {len(articles)} articles so far...")
+
         if not data.get("has_more"):
             return articles
+        
         cursor = data["next_cursor"]
+

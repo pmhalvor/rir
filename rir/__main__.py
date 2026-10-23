@@ -2,7 +2,7 @@
 import random
 import sys
 
-from rir import mailer, notion
+from rir import mailer, notion, stats
 from rir.env import load_dotenv
 
 
@@ -23,10 +23,8 @@ def main():
 
     count = int(env.get("RIR_ARTICLE_COUNT", "4"))
     rng = random.Random()
-    sections = {
-        key: mailer.pick_articles(group, count, rng)
-        for key, group in mailer.categorize(articles).items()
-    }
+    groups = mailer.categorize(articles)
+    sections = {key: mailer.pick_articles(group, count, rng) for key, group in groups.items()}
     total = sum(len(group) for group in sections.values())
     if not total:
         print("No articles in any section; nothing to send.")
@@ -34,7 +32,10 @@ def main():
 
     recipients = [r.strip() for r in env["RIR_RECIPIENTS"].split(",") if r.strip()]
     msg = mailer.build_message(
-        sections, env.get("SMTP_FROM", env.get("SMTP_USER", "")), recipients
+        sections,
+        env.get("SMTP_FROM", env.get("SMTP_USER", "")),
+        recipients,
+        stats.compute_stats(articles, groups, tz=env.get("RIR_TIMEZONE", "Europe/Oslo")),
     )
 
     if env.get("RIR_DRY_RUN"):
