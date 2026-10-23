@@ -1,15 +1,12 @@
-services:
+﻿services:
   rir:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: rir
     image: ghcr.io/pmhalvor/rir:latest
-    restart: always
-    ports:
-      - "587:587"
     env_file:
       - .env
     environment:
       DEBUG: "false"
     platform: linux/amd64
+    restart: "no"
