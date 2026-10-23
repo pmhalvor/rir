@@ -1,12 +1,16 @@
 ﻿import os
 import random
 import sys
+import time
 
 from rir import mailer, notion, stats
 from rir.env import load_dotenv
 
 
 def main():
+    start_time = time.time()
+    print(f"RIR briefing process started at {time.ctime(start_time)}")
+
     load_dotenv(os.environ.get("RIR_ENV_FILE", ".env"))
     env = os.environ
 
@@ -50,7 +54,11 @@ def main():
         env.get("SMTP_PASSWORD"),
     )
 
+    end_time = time.time()
+
     print(f"Sent {total} articles to {len(recipients)} recipient(s).")
+    print(f"RIR briefing process ended at {time.ctime(end_time)}")
+    print(f"Elapsed time: {end_time - start_time}") 
     return 0
 
 
