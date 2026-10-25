@@ -1,0 +1,12 @@
+﻿services:
+  rir:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/pmhalvor/rir:latest
+    env_file:
+      - .env
+    environment:
+      DEBUG: "false"
+    platform: linux/amd64
+    restart: "no"
