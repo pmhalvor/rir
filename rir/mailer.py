@@ -105,8 +105,11 @@ def _quadrant(key, heading, blurb, articles, colors):
     for a in articles:
         a_colors = {**colors, **a.get("tag_colors", {})}
         pills = "".join(tag_pill(t, a_colors.get(t, "default")) for t in a["tags"])
+        main = a.get("source_url") or a["url"]
+        extra = [("public", a["url"]), ("edit", a.get("edit_url"))]
+        suffix = " ".join(f'<small>[<a href="{escape(u)}">{label}</a>]</small>' for label, u in extra if u)
         items.append(
-            f'<li style="margin-bottom:8px"><a href="{escape(a["url"])}">{escape(a["title"])}</a>'
+            f'<li style="margin-bottom:8px"><a href="{escape(main)}">{escape(a["title"])}</a> {suffix}'
             f'<br>{pills or "<small>no tags yet</small>"}</li>'
         )
     body = f'<ul style="margin:0;padding-left:20px;">{"".join(items)}</ul>' if items else "<i>Nothing here this week.</i>"
@@ -220,7 +223,10 @@ def build_message(sections, sender, recipients, stats=None):
         text += ["", f"== {heading} ==", blurb]
         for a in articles:
             tags = ", ".join(a["tags"]) or "no tags yet"
-            text.append(f"- {a['title']} [{tags}]\n  {a['url']}")
+            links = [f"  {a.get('source_url') or a['url']}", f"  public: {a['url']}"]
+            if a.get("edit_url"):
+                links.append(f"  edit: {a['edit_url']}")
+            text.append(f"- {a['title']} [{tags}]\n" + "\n".join(links))
     html.append(
         '<table role="presentation" style="width:100%;border-collapse:separate;border-spacing:12px;">'
         f'<tr>{cells[0]}{cells[1]}</tr><tr>{cells[2]}{cells[3]}</tr></table>'

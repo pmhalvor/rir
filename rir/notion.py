@@ -30,11 +30,13 @@ def has_content(token, page_id, min_blocks=1):
 def parse_page(page, public_base=None):
     props = page.get("properties", {})
 
-    title, tags, tag_colors, status = "Untitled", [], {}, ""
+    title, tags, tag_colors, status, source_url = "Untitled", [], {}, "", ""
 
     for name, prop in props.items():
         kind = prop.get("type")
-        if kind == "title":
+        if name.lower() == "url" and kind == "url":
+            source_url = prop.get("url") or ""
+        elif kind == "title":
             title = "".join(t.get("plain_text", "") for t in prop["title"]) or title
         elif name == "Status" and kind in ("status", "select"):
             status = (prop.get(kind) or {}).get("name", "")
@@ -53,6 +55,8 @@ def parse_page(page, public_base=None):
         "tag_colors": tag_colors,
         "created": page.get("created_time", ""),
         "url": url,
+        "source_url": source_url,
+        "edit_url": page.get("url", ""),
         "status": status,
         "commented": False,
     }
